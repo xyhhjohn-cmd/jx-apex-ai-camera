@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, user-scalable=no">
+
+<title>JX APEX AI CAMERA</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#030305;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.camera-app{
+    position:relative;
+    width:100%;
+    height:100%;
+    max-width:1100px;
+    overflow:hidden;
+    background:#000;
+}
+
+#camera{
+    position:absolute;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:#000;
+}
+
+#overlay{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+
+.topbar{
+    position:absolute;
+    z-index:10;
+    top:0;
+    left:0;
+    right:0;
+
+    padding:
+        max(18px,env(safe-area-inset-top))
+        18px
+        18px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(0,0,0,.88),
+            rgba(0,0,0,.15),
+            transparent
+        );
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.brand-icon{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:18px;
+    font-weight:bold;
+
+    background:linear-gradient(
+        135deg,
+        #6f00ff,
+        #b45cff
+    );
+
+    box-shadow:
+        0 0 18px rgba(155,70,255,.8);
+}
+
+.brand-text{
+    font-size:14px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.brand-sub{
+    margin-top:3px;
+    font-size:9px;
+    color:#bda9d0;
+    letter-spacing:1px;
+}
+
+.live{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    padding:8px 12px;
+    border-radius:20px;
+
+    background:rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.12);
+
+    font-size:11px;
+    font-weight:bold;
+}
+
+.live-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#00ff88;
+    box-shadow:0 0 12px #00ff88;
+}
+
+.scanner{
+    position:absolute;
+    z-index:4;
+    left:50%;
+    top:50%;
+
+    width:240px;
+    height:300px;
+
+    transform:translate(-50%,-50%);
+
+    pointer-events:none;
+    opacity:.55;
+}
+
+.corner{
+    position:absolute;
+    width:35px;
+    height:35px;
+    border-color:#b45cff;
+    border-style:solid;
+    filter:
+        drop-shadow(0 0 7px #9d4edd);
+}
+
+.c1{
+    top:0;
+    left:0;
+    border-width:3px 0 0 3px;
+}
+
+.c2{
+    top:0;
+    right:0;
+    border-width:3px 3px 0 0;
+}
+
+.c3{
+    bottom:0;
+    left:0;
+    border-width:0 0 3px 3px;
+}
+
+.c4{
+    bottom:0;
+    right:0;
+    border-width:0 3px 3px 0;
+}
+
+.scan-line{
+    position:absolute;
+    left:8px;
+    right:8px;
+    height:2px;
+    top:10%;
+
+    background:linear-gradient(
+        90deg,
+        transparent,
+        #b45cff,
+        transparent
+    );
+
+    box-shadow:0 0 15px #b45cff;
+
+    animation:scan 2.8s linear infinite;
+}
+
+@keyframes scan{
+    0%{top:8%}
+    50%{top:90%}
+    100%{top:8%}
+}
+
+.status-panel{
+    position:absolute;
+    z-index:10;
+
+    left:50%;
+    bottom:
+        calc(85px + env(safe-area-inset-bottom));
+
+    transform:translateX(-50%);
+
+    width:calc(100% - 32px);
+    max-width:480px;
+
+    padding:14px 18px;
+
+    border-radius:18px;
+
+    background:rgba(8,3,15,.78);
+    border:1px solid rgba(180,92,255,.35);
+
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+
+    box-shadow:
+        0 0 30px rgba(125,30,255,.18);
+}
+
+.status-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+.ai-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#b45cff;
+    box-shadow:0 0 10px #b45cff;
+}
+
+.status-message{
+    margin-top:7px;
+    color:#d8d0df;
+    font-size:13px;
+}
+
+.person-name{
+    margin-top:9px;
+
+    display:none;
+
+    font-size:18px;
+    font-weight:bold;
+
+    color:#fff;
+
+    text-shadow:
+        0 0 8px #b45cff,
+        0 0 20px rgba(180,92,255,.7);
+}
+
+.demo-label{
+    display:none;
+    margin-top:5px;
+    font-size:10px;
+    color:#a99ab2;
+}
+
+.controls{
+    position:absolute;
+    z-index:20;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    padding:
+        12px 18px
+        calc(18px + env(safe-area-inset-bottom));
+
+    display:flex;
+    justify-content:center;
+    gap:12px;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(0,0,0,.9),
+            transparent
+        );
+}
+
+button{
+    border:0;
+    outline:0;
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:bold;
+    letter-spacing:.5px;
+
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease;
+}
+
+button:active{
+    transform:scale(.95);
+}
+
+.start-btn{
+    min-width:180px;
+    padding:14px 22px;
+
+    border-radius:30px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6500ff,
+            #b45cff
+        );
+
+    box-shadow:
+        0 0 20px rgba(150,60,255,.55);
+}
+
+.switch-btn{
+    width:48px;
+    height:48px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.18);
+
+    font-size:20px;
+}
+
+.start-screen{
+    position:absolute;
+    z-index:100;
+    inset:0;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:25px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(112,0,255,.25),
+            transparent 42%
+        ),
+        #030305;
+
+    transition:
+        opacity .5s ease,
+        visibility .5s ease;
+}
+
+.start-screen.hidden{
+    opacity:0;
+    visibility:hidden;
+}
+
+.start-logo{
+    width:90px;
+    height:90px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6200ff,
+            #bb63ff
+        );
+
+    box-shadow:
+        0 0 35px rgba(165,70,255,.65);
+
+    font-size:32px;
+    font-weight:bold;
+
+    margin-bottom:24px;
+}
+
+.start-screen h1{
+    font-size:25px;
+    letter-spacing:2px;
+}
+
+.start-screen p{
+    margin-top:9px;
+    color:#aaa;
+    font-size:12px;
+    max-width:310px;
+    line-height:1.5;
+}
+
+.start-camera{
+    margin-top:28px;
+
+    padding:15px 30px;
+
+    border-radius:30px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6d00ff,
+            #b95eff
+        );
+
+    box-shadow:
+        0 0 25px rgba(160,70,255,.55);
+}
+
+.error-box{
+    position:absolute;
+    z-index:150;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    width:calc(100% - 40px);
+    max-width:420px;
+
+    padding:22px;
+
+    border-radius:20px;
+
+    background:#100b14;
+    border:1px solid #8f48bb;
+
+    display:none;
+
+    text-align:center;
+
+    box-shadow:
+        0 0 40px rgba(0,0,0,.8);
+}
+
+.error-box h2{
+    font-size:18px;
+    margin-bottom:10px;
+}
+
+.error-box p{
+    color:#bbb;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.retry{
+    margin-top:18px;
+    padding:11px 22px;
+    border-radius:25px;
+    background:#7a22c7;
+}
+
+@media(min-width:700px){
+
+    .camera-app{
+        height:90vh;
+        border-radius:22px;
+
+        box-shadow:
+            0 0 70px rgba(110,0,255,.22);
+    }
+
+    body{
+        background:
+            radial-gradient(
+                circle,
+                #160025,
+                #020203 65%
+            );
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="camera-app">
+
+    <video
+        id="camera"
+        autoplay
+        muted
+        playsinline>
+    </video>
+
+    <canvas id="overlay"></canvas>
+
+    <div class="topbar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                JX
+            </div>
+
+            <div>
+                <div class="brand-text">
+                    JX APEX AI
+                </div>
+
+                <div class="brand-sub">
+                    SMART CAMERA
+                </div>
+            </div>
+
+        </div>
+
+        <div class="live">
+            <span class="live-dot"></span>
+            <span id="liveText">OFFLINE</span>
+        </div>
+
+    </div>
+
+    <div class="scanner">
+
+        <div class="corner c1"></div>
+        <div class="corner c2"></div>
+        <div class="corner c3"></div>
+        <div class="corner c4"></div>
+
+        <div class="scan-line"></div>
+
+    </div>
+
+    <div class="status-panel">
+
+        <div class="status-title">
+
+            <span class="ai-dot"></span>
+
+            <span id="statusTitle">
+                AI CAMERA READY
+            </span>
+
+        </div>
+
+        <div
+            class="status-message"
+            id="statusMessage">
+            Press START CAMERA to begin.
+        </div>
+
+        <div
+            class="person-name"
+            id="personName">
+            Jester Melendes
+        </div>
+
+        <div
+            class="demo-label"
+            id="demoLabel">
+            DEMO / CUSTOM LABEL — NOT IDENTITY VERIFICATION
+        </div>
+
+    </div>
+
+    <div class="controls">
+
+        <button
+            class="switch-btn"
+            id="switchCamera"
+            title="Switch camera">
+            ↻
+        </button>
+
+        <button
+            class="start-btn"
+            id="startButton">
+            START CAMERA
+        </button>
+
+    </div>
+
+    <div
+        class="start-screen"
+        id="startScreen">
+
+        <div class="start-logo">
+            JX
+        </div>
+
+        <h1>
+            JX APEX AI
+        </h1>
+
+        <p>
+            Smart camera with real-time
+            person detection.
+        </p>
+
+        <button
+            class="start-camera"
+            id="startScreenButton">
+            START CAMERA
+        </button>
+
+    </div>
+
+    <div
+        class="error-box"
+        id="errorBox">
+
+        <h2>
+            CAMERA ERROR
+        </h2>
+
+        <p id="errorMessage">
+            Camera could not be started.
+        </p>
+
+        <button
+            class="retry"
+            id="retryButton">
+            TRY AGAIN
+        </button>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+
+<script>
+
+const video =
+    document.getElementById("camera");
+
+const canvas =
+    document.getElementById("overlay");
+
+const ctx =
+    canvas.getContext("2d");
+
+const startScreen =
+    document.getElementById("startScreen");
+
+const startButton =
+    document.getElementById("startButton");
+
+const startScreenButton =
+    document.getElementById("startScreenButton");
+
+const switchCamera =
+    document.getElementById("switchCamera");
+
+const liveText =
+    document.getElementById("liveText");
+
+const statusTitle =
+    document.getElementById("statusTitle");
+
+const statusMessage =
+    document.getElementById("statusMessage");
+
+const personName =
+    document.getElementById("personName");
+
+const demoLabel =
+    document.getElementById("demoLabel");
+
+const errorBox =
+    document.getElementById("errorBox");
+
+const errorMessage =
+    document.getElementById("errorMessage");
+
+const retryButton =
+    document.getElementById("retryButton");
+
+
+let stream = null;
+let model = null;
+let running = false;
+
+let facingMode = "environment";
+
+let lastTime = performance.now();
+let frames = 0;
+let fps = 0;
+
+
+/* =========================
+   START CAMERA
+========================= */
+
+async function startCamera(){
+
+    hideError();
+
+    try{
+
+        statusTitle.textContent =
+            "STARTING CAMERA...";
+
+        statusMessage.textContent =
+            "Requesting camera permission...";
+
+        const constraints = {
+
+            audio:false,
+
+            video:{
+                facingMode:{
+                    ideal:facingMode
+                },
+
+                width:{
+                    ideal:1280
+                },
+
+                height:{
+                    ideal:720
+                }
+            }
+        };
+
+        stream =
+            await navigator.mediaDevices
+            .getUserMedia(constraints);
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        startScreen.classList.add("hidden");
+
+        liveText.textContent =
+            "LIVE";
+
+        statusTitle.textContent =
+            "LOADING AI...";
+
+        statusMessage.textContent =
+            "Loading person detection model...";
+
+        if(!model){
+
+            model =
+                await cocoSsd.load();
+
+        }
+
+        running = true;
+
+        statusTitle.textContent =
+            "AI CAMERA ONLINE";
+
+        statusMessage.textContent =
+            "Searching for people...";
+
+        resizeCanvas();
+
+        detect();
+
+    }catch(error){
+
+        console.error(error);
+
+        running = false;
+
+        showError(
+            getCameraError(error)
+        );
+
+    }
+
+}
+
+
+/* =========================
+   CAMERA ERROR
+========================= */
+
+function getCameraError(error){
+
+    if(!error){
+        return "Unknown camera error.";
+    }
+
+    if(error.name === "NotAllowedError"){
+
+        return "Camera permission was denied. Allow camera access in your browser settings, then try again.";
+
+    }
+
+    if(error.name === "NotFoundError"){
+
+        return "No camera was found on this device.";
+
+    }
+
+    if(error.name === "NotReadableError"){
+
+        return "The camera may already be in use by another app.";
+
+    }
+
+    if(error.name === "SecurityError"){
+
+        return "The browser blocked camera access. Open this project through HTTPS, such as GitHub Pages.";
+
+    }
+
+    return "Camera could not be started: " + error.message;
+
+}
+
+
+/* =========================
+   STOP CAMERA
+========================= */
+
+function stopCamera(){
+
+    running = false;
+
+    if(stream){
+
+        stream.getTracks().forEach(
+            track => track.stop()
+        );
+
+        stream = null;
+
+    }
+
+    video.srcObject = null;
+
+    liveText.textContent =
+        "OFFLINE";
+
+}
+
+
+/* =========================
+   SWITCH CAMERA
+========================= */
+
+async function changeCamera(){
+
+    if(!stream){
+
+        return;
+
+    }
+
+    stopCamera();
+
+    facingMode =
+        facingMode === "environment"
+        ? "user"
+        : "environment";
+
+    await startCamera();
+
+}
+
+
+/* =========================
+   RESIZE CANVAS
+========================= */
+
+function resizeCanvas(){
+
+    if(
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+    ){
+
+        return;
+
+    }
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+}
+
+
+/* =========================
+   PERSON DETECTION
+========================= */
+
+async function detect(){
+
+    if(
+        !running ||
+        !model ||
+        video.readyState < 2
+    ){
+
+        if(running){
+
+            requestAnimationFrame(
+                detect
+            );
+
+        }
+
+        return;
+
+    }
+
+    resizeCanvas();
+
+    try{
+
+        const predictions =
+            await model.detect(
+                video,
+                20,
+                0.50
+            );
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        let people = [];
+
+        predictions.forEach(
+            prediction => {
+
+                if(
+                    prediction.class === "person" &&
+                    prediction.score >= 0.55
+                ){
+
+                    people.push(
+                        prediction
+                    );
+
+                }
+
+            }
+        );
+
+        drawPeople(people);
+
+        updateInterface(people);
+
+        updateFPS();
+
+    }catch(error){
+
+        console.error(
+            "Detection error:",
+            error
+        );
+
+    }
+
+    if(running){
+
+        requestAnimationFrame(
+            detect
+        );
+
+    }
+
+}
+
+
+/* =========================
+   DRAW DETECTION BOXES
+========================= */
+
+function drawPeople(people){
+
+    people.forEach(
+        (person,index) => {
+
+            const [
+                x,
+                y,
+                width,
+                height
+            ] = person.bbox;
+
+            ctx.save();
+
+            ctx.shadowColor =
+                "#b45cff";
+
+            ctx.shadowBlur =
+                12;
+
+            ctx.strokeStyle =
+                "#c77dff";
+
+            ctx.lineWidth =
+                4;
+
+            ctx.strokeRect(
+                x,
+                y,
+                width,
+                height
+            );
+
+            ctx.restore();
+
+            const confidence =
+                Math.round(
+                    person.score * 100
+                );
+
+            const label =
+                people.length === 1
+                ? "PERSON DETECTED"
+                : "PERSON " + (index + 1);
+
+            const text =
+                label +
+                " • " +
+                confidence +
+                "%";
+
+            ctx.font =
+                "bold 15px Arial";
+
+            const textWidth =
+                ctx.measureText(
+                    text
+                ).width;
+
+            const labelHeight =
+                30;
+
+            const labelWidth =
+                textWidth + 18;
+
+            let labelY =
+                y - labelHeight;
+
+            if(labelY < 0){
+
+                labelY = y;
+
+            }
+
+            ctx.fillStyle =
+                "rgba(91,0,150,.88)";
+
+            ctx.fillRect(
+                x,
+                labelY,
+                labelWidth,
+                labelHeight
+            );
+
+            ctx.fillStyle =
+                "#ffffff";
+
+            ctx.fillText(
+                text,
+                x + 9,
+                labelY + 20
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================
+   UPDATE UI
+========================= */
+
+function updateInterface(people){
+
+    if(people.length === 0){
+
+        statusTitle.textContent =
+            "AI CAMERA ONLINE";
+
+        statusMessage.textContent =
+            "Searching for people...";
+
+        personName.style.display =
+            "none";
+
+        demoLabel.style.display =
+            "none";
+
+        return;
+
+    }
+
+    if(people.length === 1){
+
+        statusTitle.textContent =
+            "PERSON DETECTED";
+
+        statusMessage.textContent =
+            "1 person detected by the AI camera.";
+
+        personName.textContent =
+            "Jester Melendes";
+
+        personName.style.display =
+            "block";
+
+        demoLabel.style.display =
+            "block";
+
+    }else{
+
+        statusTitle.textContent =
+            "PEOPLE DETECTED";
+
+        statusMessage.textContent =
+            people.length +
+            " people detected by the AI camera.";
+
+        personName.style.display =
+            "none";
+
+        demoLabel.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================
+   FPS
+========================= */
+
+function updateFPS(){
+
+    frames++;
+
+    const now =
+        performance.now();
+
+    if(
+        now - lastTime >= 1000
+    ){
+
+        fps = frames;
+
+        frames = 0;
+
+        lastTime = now;
+
+    }
+
+}
+
+
+/* =========================
+   ERROR UI
+========================= */
+
+function showError(message){
+
+    errorMessage.textContent =
+        message;
+
+    errorBox.style.display =
+        "block";
+
+    liveText.textContent =
+        "ERROR";
+
+    statusTitle.textContent =
+        "CAMERA ERROR";
+
+}
+
+function hideError(){
+
+    errorBox.style.display =
+        "none";
+
+}
+
+
+/* =========================
+   EVENTS
+========================= */
+
+startButton.addEventListener(
+    "click",
+    startCamera
+);
+
+startScreenButton.addEventListener(
+    "click",
+    startCamera
+);
+
+retryButton.addEventListener(
+    "click",
+    startCamera
+);
+
+switchCamera.addEventListener(
+    "click",
+    changeCamera
+);
+
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/* =========================
+   INITIAL STATE
+========================= */
+
+statusTitle.textContent =
+    "AI CAMERA READY";
+
+statusMessage.textContent =
+    "Press START CAMERA to begin.";
+
+
+/* =========================
+   PAGE VISIBILITY
+========================= */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if(
+            document.hidden &&
+            running
+        ){
+
+            statusMessage.textContent =
+                "Camera page is in the background.";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
